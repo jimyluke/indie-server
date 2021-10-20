@@ -1,0 +1,20 @@
+#  Template NodeJS build
+
+#  This template allows you to validate your NodeJS code.
+#  The workflow allows running tests and code linting on the default branch.
+image: node:10.15.3
+
+pipelines:
+  branches:
+    master:
+      - step:
+          caches:
+            - node
+          script: # Modify the commands below to build your repository.
+            - apt-get update && apt-get install -y rsync
+            - ssh-keyscan -H $SSH_SERVER_IP >> ~/.ssh/known_hosts
+            - cd $BITBUCKET_CLONE_DIR
+            - rsync -r -v -e ssh . $SSH_SERVER_USER@$SSH_SERVER_IP:/var/www/indie-server --delete-before --exclude=.git --exclude=.env --exclude=uploads
+            - ssh $SSH_SERVER_USER@$SSH_SERVER_IP 'cd /var/www/indie-server && pm2 stop npm'
+            - ssh $SSH_SERVER_USER@$SSH_SERVER_IP 'cd /var/www/indie-server && npm install'
+            - ssh $SSH_SERVER_USER@$SSH_SERVER_IP 'cd /var/www/indie-server && pm2 start npm -- start'
