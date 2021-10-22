@@ -2,7 +2,8 @@
 const passport = require("passport"),
   User = require("../models/user"),
   JwtStrategy = require("passport-jwt").Strategy,
-  ExtractJwt = require("passport-jwt").ExtractJwt;
+  ExtractJwt = require("passport-jwt").ExtractJwt,
+  GoogleStrategy = require("passport-google-oauth20");
 require("dotenv/config");
 
 // Setting JWT strategy options
@@ -31,3 +32,38 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 });
 
 passport.use(jwtLogin);
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      passReqToCallback: true,
+    },
+    async (req, accessToken, refreshToken, profile, done) => {
+      try {
+        let user = await User.findOne({
+          authGoogleID: profile.id,
+          authType: "google",
+        });
+        if (user) return done(null, user);
+        console.log("profile ", profile);
+        const newUser = new User({
+          username: profile.displayName + profile.id,
+          email: profile.emails[0].value,
+          authType: "google",
+          profile: {
+            full_name: profile.displayName,
+          },
+          authGoogleID: profile.id,
+        });
+        await newUser.save();
+        user = newUser;
+        return done(null, user);
+      } catch (error) {
+        done(error, false);
+      }
+    }
+  )
+);

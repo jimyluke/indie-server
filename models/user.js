@@ -20,12 +20,12 @@ const UserSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     username: {
       type: String,
       lowercase: true,
-      unique: true,
+      // unique: true,
       required: true,
     },
     profile: {
@@ -49,6 +49,23 @@ const UserSchema = new Schema(
           date: { type: String },
         },
       ],
+    },
+    authType: {
+      type: String,
+      enum: ["local", "google", "facebook", "twitter"],
+      default: "local",
+    },
+    authGoogleID: {
+      type: String,
+      default: null,
+    },
+    authFbID: {
+      type: String,
+      default: null,
+    },
+    authTwitterID: {
+      type: String,
+      default: null,
     },
     role: {
       type: String,

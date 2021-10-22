@@ -105,6 +105,16 @@ exports.participantRegister = async function (req, res, next) {
   }
 };
 
+//= =======================================
+// Auth google
+//= =======================================
+exports.authGoogleSuccess = function (req, res, next) {
+  const userInfo = setUserInfo(req.user);
+  const token = `JWT ${generateToken(userInfo)}`;
+  const id = userInfo._id;
+  return res.redirect(302, `${process.env.SUCCESS_CALLBACK_URL}?token=${token}&id=${id}`);
+};
+
 exports.confirmEmail = async (req, res, next) => {
   const { token } = req.body;
   try {
