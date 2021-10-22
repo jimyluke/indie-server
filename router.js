@@ -66,7 +66,7 @@ module.exports = function (app) {
     "/reset-password-security",
     AuthenticationController.resetPasswordSecurity
   );
-
+//Login with google
   authRoutes.get(
     "/login/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
@@ -81,6 +81,21 @@ module.exports = function (app) {
     }),
     AuthenticationController.authGoogleSuccess
   );
+//Login with facebook
+authRoutes.get(
+  "/login/facebook",
+  passport.authenticate("facebook",{ scope: ['public_profile','email'] } )
+);
+
+authRoutes.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", {
+    failureMessage: "Cannot login to Google, please try again latery!",
+    failureRedirect: process.env.ERROR_CALLBACK_URL,
+    session: false,
+  }),
+  AuthenticationController.authGoogleSuccess
+);
 
   // Verify route
   authRoutes.post("/verify", AuthenticationController.confirmEmail);
